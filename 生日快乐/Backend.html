@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>奖品记录 - 后台管理</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            font-family: 'Microsoft YaHei', sans-serif;
+            color: white;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2em;
+            background: linear-gradient(90deg, #ffd700, #ff6b6b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #888;
+            margin-bottom: 40px;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+
+        .stat-card {
+            background: rgba(255,255,255,0.1);
+            padding: 20px 40px;
+            border-radius: 15px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .stat-card .number {
+            font-size: 36px;
+            font-weight: bold;
+            color: #ffd700;
+        }
+
+        .stat-card .label {
+            color: #aaa;
+            margin-top: 5px;
+        }
+
+        .records-table {
+            width: 100%;
+            background: rgba(255,255,255,0.05);
+            border-radius: 15px;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .records-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .records-table th,
+        .records-table td {
+            padding: 15px 20px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .records-table th {
+            background: rgba(255,215,0,0.2);
+            color: #ffd700;
+            font-weight: bold;
+        }
+
+        .records-table tr:hover {
+            background: rgba(255,255,255,0.05);
+        }
+
+        .records-table .prize-name {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .records-table .prize-icon {
+            font-size: 24px;
+        }
+
+        .no-records {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+
+        .no-records .icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+        }
+
+        .clear-btn {
+            display: block;
+            margin: 30px auto;
+            padding: 12px 30px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .clear-btn:hover {
+            background: #c0392b;
+            transform: scale(1.05);
+        }
+
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            color: #ffd700;
+            text-decoration: none;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            background: rgba(46, 204, 113, 0.2);
+            color: #2ecc71;
+        }
+
+        /* 移动端适配 */
+        @media screen and (max-width: 480px) {
+            body {
+                padding: 20px 10px;
+            }
+
+            h1 {
+                font-size: 1.5em;
+            }
+
+            .stats {
+                gap: 15px;
+            }
+
+            .stat-card {
+                padding: 15px 25px;
+            }
+
+            .stat-card .number {
+                font-size: 28px;
+            }
+
+            .records-table th,
+            .records-table td {
+                padding: 12px 10px;
+                font-size: 14px;
+            }
+
+            .records-table .prize-icon {
+                font-size: 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎁 奖品记录中心</h1>
+        <p class="subtitle">所有中奖记录都在这里</p>
+
+        <div class="stats">
+            <div class="stat-card">
+                <div class="number" id="totalCount">0</div>
+                <div class="label">总抽奖次数</div>
+            </div>
+            <div class="stat-card">
+                <div class="number" id="todayCount">0</div>
+                <div class="label">今日抽奖</div>
+            </div>
+        </div>
+
+        <div class="records-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>序号</th>
+                        <th>奖品</th>
+                        <th>抽奖时间</th>
+                        <th>状态</th>
+                    </tr>
+                </thead>
+                <tbody id="recordsBody">
+                </tbody>
+            </table>
+            <div class="no-records" id="noRecords" style="display: none;">
+                <div class="icon">📭</div>
+                <p>暂无抽奖记录</p>
+                <p>快去转盘抽奖吧！</p>
+            </div>
+        </div>
+
+        <button class="clear-btn" onclick="clearRecords()">清空所有记录</button>
+        <a href="Roulette.html" class="back-link">← 返回抽奖页面</a>
+    </div>
+
+    <script>
+        const prizeIcons = {
+            '111.1元': '🧧',
+            '66.66元': '🧧',
+            '88.88元': '🧧',
+            '99.99元': '🧧',
+            '100.1元': '🧧'
+        };
+
+        function loadRecords() {
+            const records = JSON.parse(localStorage.getItem('prizeRecords') || '[]');
+            const tbody = document.getElementById('recordsBody');
+            const noRecords = document.getElementById('noRecords');
+            
+            // 更新统计
+            document.getElementById('totalCount').textContent = records.length;
+            
+            const today = new Date().toDateString();
+            const todayRecords = records.filter(r => {
+                const recordDate = new Date(r.time).toDateString();
+                return recordDate === today;
+            });
+            document.getElementById('todayCount').textContent = todayRecords.length;
+
+            if (records.length === 0) {
+                tbody.innerHTML = '';
+                noRecords.style.display = 'block';
+                return;
+            }
+
+            noRecords.style.display = 'none';
+            
+            // 倒序显示（最新的在前面）
+            const sortedRecords = [...records].reverse();
+            
+            tbody.innerHTML = sortedRecords.map((record, index) => `
+                <tr>
+                    <td>#${records.length - index}</td>
+                    <td>
+                        <div class="prize-name">
+                            <span class="prize-icon">${prizeIcons[record.prize] || '🎁'}</span>
+                            <span>${record.prize}</span>
+                        </div>
+                    </td>
+                    <td>${record.time}</td>
+                    <td><span class="status-badge">待兑换</span></td>
+                </tr>
+            `).join('');
+        }
+
+        function clearRecords() {
+            if (confirm('确定要清空所有抽奖记录吗？')) {
+                localStorage.removeItem('prizeRecords');
+                loadRecords();
+                alert('记录已清空！');
+            }
+        }
+
+        // 页面加载时读取记录
+        window.onload = loadRecords;
+    </script>
+</body>
+</html>
